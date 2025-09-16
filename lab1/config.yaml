@@ -1,0 +1,11 @@
+multicast:
+  group: "224.1.1.1"  
+  port: 5000          
+  message: "12242232" 
+  encoding: "utf-8"   
+
+time:
+  offset: 3           
+
+network: 
+  buffer_size: 1024   
