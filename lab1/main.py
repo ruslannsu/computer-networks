@@ -1,9 +1,5 @@
-import threading
-import time
-print(time.time())
+import finder
 
+self_finder = finder.Finder()
+self_finder.run()
 
-num = 140239423
-
-
-print(f"{num} dead")

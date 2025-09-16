@@ -74,6 +74,3 @@ class Finder(object):
     
 
 
-f = Finder()
-
-f.run()
