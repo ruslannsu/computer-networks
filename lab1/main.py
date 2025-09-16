@@ -1,10 +1,19 @@
+import threading
 
 
-import finder
+def printer(string):
+    while (1):
+      print(string)
+      
 
 
-c = finder.Finder()
+
+thread1 = threading.Thread(target=printer, args=('hello world', ))
 
 
-while (True):
-    c.multicast_send()
+thread2 = threading.Thread(target=printer, args=('hello thread', ))
+
+
+thread1.start()
+thread2.start()
+    

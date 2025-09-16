@@ -1,5 +1,7 @@
-from socket import *
 import struct
+import time 
+from socket import *
+from threading import *
 
 
 class Finder(object):
@@ -17,18 +19,25 @@ class Finder(object):
         self.rec_socket.setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP, mreq)
 
     def multicast_send(self):
-        send_message = self.message.encode(self.enc)
-        self.send_socket.sendto(send_message, self.multicast_group)
+        while(True):
+            send_message = self.message.encode(self.enc)
+            self.send_socket.sendto(send_message, self.multicast_group)
+            time.sleep(1)
 
     def multicast_receive(self):
-        data, addr = self.rec_socket.recvfrom(1024)
-        print(data.decode(self.enc))
+        while(True):
+            data, addr = self.rec_socket.recvfrom(1024)
+            print(data.decode(self.enc))
+            print(addr)
+            time.sleep(1)
 
+
+    def run(self):
+        rec_thread = Thread(target=self.multicast_receive)
+        send_thread = Thread(target=self.multicast_send)
+        rec_thread.start()
+        send_thread.start()
 
 
 f = Finder()
-print('1')
-while(1):
-    f.multicast_send()
-    f.multicast_receive()
-    
+f.run()
