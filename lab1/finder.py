@@ -3,9 +3,6 @@ import time
 from socket import *
 import yaml
 
-
-
-
 class Finder(object):
     def __init__(self):
         self.config = self._load_config()
@@ -54,7 +51,8 @@ class Finder(object):
         print('ALIVE: ')
         for key, _ in self.dict.items():
             print(key)    
-        print('')    
+        print('')   
+   
 
     def run(self):
         while (True):
@@ -62,7 +60,7 @@ class Finder(object):
             self.send_socket.sendto(send_message, self.multicast_group)
             message, address = self.rec_socket.recvfrom(self.buffer_size)
             message = message.decode(self.enc)
-            if (message != self.message):
+            if (message != self.message ):
                 continue
             if (not(address in self.dict)):
                 print(f"NEW: {address}")
