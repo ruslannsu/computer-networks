@@ -2,7 +2,7 @@ from threading import Thread
 
 
 
-class Reader:
+class Reader():
     def __init__(self, socket):
         self.socket = socket
         self.read_thread = Thread()

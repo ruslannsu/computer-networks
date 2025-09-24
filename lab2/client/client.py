@@ -1,13 +1,16 @@
 from socket import *
-
+from client_features.writer import ClientWriter
 
 class Client:
     def __init__(self):
         self.socket = socket(AF_INET, SOCK_STREAM)
-        self.address = ('localhost', 5090)
-        self.socket.bind(self[0])fd
+
+    def run_client(self):
+        self.socket.connect(('127.0.0.1', 9000))
+        self.client_writer = ClientWriter(self.socket)
+
         
 
-    def create_features(self):
-        pass
+
+        
 
