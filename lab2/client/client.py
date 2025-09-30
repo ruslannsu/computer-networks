@@ -1,5 +1,6 @@
 from socket import *
 from client_features.writer import ClientWriter
+from file_protocol import FileProtocol
 import yaml
 
 
@@ -8,6 +9,8 @@ class Client:
         self.socket = socket(AF_INET, SOCK_STREAM)
         self.config = self._load_config()
         self.server_address = (self.config['server']['server_ip'], self.config['server']['server_port'])
+        self.file_path = self.config['file']['file_path']
+        self.protocol = FileProtocol('f', 5, 13)
 
 
     def _load_config(self):
@@ -17,7 +20,7 @@ class Client:
 
     def run_client(self):
         self.socket.connect(self.server_address)
-        self.client_writer = ClientWriter(self.socket)
+        self.client_writer = ClientWriter(self.socket, self.protocol)
         self.client_writer.run()
 
         

@@ -2,9 +2,7 @@ server:
   server_ip: '127.0.0.1'
   server_port: 9000  
   
-
-file_protocol:
-  file_size_section_len: 13
-  file_header_len: 5
+file:
+  file_path: "./file"
   
 

@@ -9,10 +9,12 @@ class ServerThread(Thread):
 
     def run(self) -> None:
         while (True):
-            buffer = self.client_socket.recv(10)
-            print(len(buffer))
+            buffer = self.client_socket.recv(5)
             print(buffer.decode('utf-8'))
-            print(len(buffer.decode('utf-8')))
+            buffer = self.client_socket.recv(13)
+            print(int.from_bytes(buffer, 'big'))
+            break
+
             time.sleep(10)
 
 

@@ -2,19 +2,22 @@ import os
 import socket
 
 class FileProtocol():
-    def __init__(self, file_path: str, file_name : str, file_header_size : int) -> None:
+    def __init__(self, file_path: str, file_header_size_len : int, file_data_size_len : int) -> None:
         self.file_path = file_path
         self.enc = 'utf-8'
-        self.file = open(self.file_path, mode='b')
-        self.file_size = int.to_bytes(os.stat(self.file_path).st_size, byteorder='big')
-        self.file_name = file_name.encode(self.enc)
-        self.file_header_size = int.to_bytes(file_header_size, byteorder='big')
+        self.file = open(self.file_path, mode='w+b')
+        self.data_size = os.stat(self.file_path).st_size
+        self.data_size_coded = os.stat(self.file_path).st_size.to_bytes(file_data_size_len, 'big')
+        self.file_name = file_path.encode(self.enc)
+        self.file_header_size = len(file_path).to_bytes(file_header_size_len, byteorder='big')
         self.magic_word = 'MAGIC'.encode(self.enc)
+        self.file_total_size = len(file_path) + file_header_size_len + len(self.magic_word) + self.data_size + file_data_size_len
+        self.file_total_size = self.file_total_size.to_bytes(file_data_size_len, 'big')
 
-
+        
     def send_header(self, sock : socket) -> None:
         sock.send(self.magic_word)
-        sock.send(self.file_size)
+        sock.send(self.file_total_size)
         sock.send(self.file_header_size)
         sock.send(self.file_name)
 
