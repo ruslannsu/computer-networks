@@ -15,7 +15,6 @@ class Server:
     def _load_config(self):
         with open('config.yaml', 'r') as f:
             return yaml.safe_load(f) 
-    
         
         
     def _listen(self):
@@ -25,7 +24,7 @@ class Server:
             server_thread = ServerThread(client_socket)
             self.server_threads.append(server_thread)
             server_thread.start()
-            
+
 
             
 
