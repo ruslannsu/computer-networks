@@ -7,13 +7,10 @@ class ClientWriter(Thread):
         super().__init__()
         self.client_socket = client_socket
 
-
     def run(self) -> None:
         while True:
             string = "Hello world"
             buffer = string.encode('utf-8') 
-            self.client_socket.sendall(buffer)
+            self.client_socket.send(buffer)
             time.sleep(10)
-
-        
-        
+            

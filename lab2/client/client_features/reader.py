@@ -12,9 +12,3 @@ class Reader():
         while True: 
             
 
-
-
-    def run_reader(self):
-        read_thread    
-        
-

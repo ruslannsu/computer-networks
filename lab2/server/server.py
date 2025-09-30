@@ -1,5 +1,8 @@
 from socket import *
 from server_features.server_threads import ServerThread
+import yaml
+
+
 
 class Server:
     def __init__(self):
@@ -7,6 +10,12 @@ class Server:
         self.server_socket = socket(AF_INET, SOCK_STREAM)
         self.server_socket.bind(self.address)
         self.server_threads = []
+
+
+    def _load_config(self):
+        with open('config.yaml', 'r') as f:
+            return yaml.safe_load(f) 
+    
         
         
     def _listen(self):
@@ -16,7 +25,7 @@ class Server:
             server_thread = ServerThread(client_socket)
             self.server_threads.append(server_thread)
             server_thread.start()
-
+            
 
             
 
