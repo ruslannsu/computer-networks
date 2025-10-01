@@ -9,11 +9,13 @@ class Client:
     def __init__(self):
         self.socket = socket(AF_INET, SOCK_STREAM)
         self.config = self._load_config()
+        self.socket.bind((self.config['client']['ip'], self.config['client']['port']))
+        self.config = self._load_config()
         self.server_address = (self.config['server']['server_ip'], self.config['server']['server_port'])
         self.file_path = self.config['file']['file_path']
         self.protocol = FileProtocol('FILE', 5, 13)
+      
     
-
 
     def _load_config(self):
         with open('config.yaml', 'r') as f:

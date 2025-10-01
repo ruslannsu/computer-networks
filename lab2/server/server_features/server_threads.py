@@ -13,9 +13,8 @@ class ServerThread(Thread):
         self.reader.run_server_reader(self.client_socket)
         
         
-        
-
-
+    def __exit__(self):
+        self.client_socket.close()
 
 
 

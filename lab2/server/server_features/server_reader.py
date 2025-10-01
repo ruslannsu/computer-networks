@@ -1,8 +1,7 @@
 import socket
 import time
-
 class ServerReader():
-    def __init__(self, magic_len: int, magic_word : str,file_total_size_len: int, file_header_size_len: int, total_size_max : int, header_max_size : int) -> None:
+    def __init__(self, magic_len: int, magic_word : str,file_total_size_len: int, file_header_size_len: int, total_size_max : int, header_max_size : int, speeds : dict) -> None:
         self.file_tota_size_len = file_total_size_len
         self.file_header_size_len = file_header_size_len
         self.magic_len = magic_len
@@ -11,6 +10,7 @@ class ServerReader():
         self.code = 'utf-8'
         self.total_max_size = total_size_max
         self.hedaer_max_size = header_max_size
+        self.speeds = speeds
         
 
     def read_exactly(self, size : int, sock : socket):
@@ -45,10 +45,10 @@ class ServerReader():
         self.file_total_size = self.read_exactly(self.file_tota_size_len, sock)
         print(int.from_bytes(self.file_total_size, 'big'))
         if (int.from_bytes(self.file_total_size, 'big') >= self.total_max_size):
-            raise ConnectionError('SIZE ERROR')
+            raise ConnectionError('SIZE TOTAL ERROR')
         self.header_size = int.from_bytes(self.read_exactly(self.file_header_size_len, sock), 'big')
         print(self.header_size)
-        if (int.from_bytes(self.file_total_size, 'big') >= self.hedaer_max_size):
+        if (self.header_size >= self.hedaer_max_size):
             raise ConnectionError('SIZE ERROR')
 
         self.file_header = self.read_exactly(self.header_size, sock)
@@ -56,37 +56,46 @@ class ServerReader():
         self.data_size = (int.from_bytes(self.file_total_size, 'big')) - len(magic_word) - self.header_size - self.file_header_size_len - self.file_tota_size_len
 
 
-    def read_data(self, sock : socket) -> None:
+    def read_data(self, sock : socket, start_time_session : int) -> None:
         size = self.data_size
-    
+
         self.file = open('./get', 'wb')
         total = 0
         print(f"data size{self.data_size}")
         while (total < self.data_size):
-            buffer = self.read_exactly(size, sock)
+            start_time = time.time()
+            buffer = sock.recv(1024)
             print(len(buffer))
             print("-buffer len data")
             total += len(buffer)
             self.file.write(buffer)
             self.file.flush()
-        
-        print("end")
+            end_time = time.time()
+            if (int(end_time) - int(start_time_session)) > 0:
+                if (((int(end_time) - int(start_time)) == 0)):
+                    speed, mid_speed = (len(buffer), total / int(end_time - start_time_session))
+                    address, _  = sock.getpeername()
+                    self.speeds[address] = (speed, mid_speed)
+
+                else:
+                    speed, mid_speed  = (len(buffer) / (int(end_time) - int(start_time)), total / int(end_time - start_time_session))
+                    address, _ = sock.getpeername()
+                    self.speeds[address] = (speed, mid_speed)
+            
         self.readed_size = total
     
 
     def run_server_reader(self, sock : socket):
+        start_time = time.time()
         self.read_header(sock)
-        self.read_data(sock)
-        print("got it")
+        self.read_data(sock, start_time)
         if self._is_correct():
             sock.send('FILE ACCEPTED'.encode(self.code))
-            print("wow")
+            
         else:
             sock.sendall('SOMETHING WRONG WITH FILE SIZE'.encode(self.code))
-            print("wow2")
-
-
-        sock.close()
+        
+        
         
 
 
