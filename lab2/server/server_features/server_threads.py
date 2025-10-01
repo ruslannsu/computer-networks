@@ -10,8 +10,9 @@ class ServerThread(Thread):
         self.reader = reader
 
     def run(self) -> None:
-        self.reader.read_header(self.client_socket)
-        self.reader.read_data(self.client_socket)
+        self.reader.run_server_reader(self.client_socket)
+        
+        
         
 
 

@@ -9,6 +9,7 @@ class Server:
     def __init__(self):
         self.address = ('127.0.0.1', 9000)
         self.server_socket = socket(AF_INET, SOCK_STREAM)
+        self.server_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         self.server_socket.bind(self.address)
         self.server_threads = []
         self.server_reader = ServerReader(5, 'MAGIC', 13, 5, 1000000000, 4096)

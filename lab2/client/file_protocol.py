@@ -39,6 +39,7 @@ class FileProtocol():
             time.sleep(2)
             sended += len(buffer)
             sock.sendall(buffer)
+            print("a")
 
          
 

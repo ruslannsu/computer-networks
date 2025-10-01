@@ -31,6 +31,10 @@ class ServerReader():
             return 262144  
 
 
+    def _is_correct(self) -> bool:
+        if (int.from_bytes(self.file_total_size, 'big') != self.readed_size + len(self.magic_word) + self.header_size + self.file_header_size_len + self.file_tota_size_len):
+            return False
+        return True 
 
     def read_header(self, sock : socket) -> None:
         magic_word = self.read_exactly(self.magic_len, sock)
@@ -51,21 +55,39 @@ class ServerReader():
         print(self.file_header.decode(self.code))
         self.data_size = (int.from_bytes(self.file_total_size, 'big')) - len(magic_word) - self.header_size - self.file_header_size_len - self.file_tota_size_len
 
+
     def read_data(self, sock : socket) -> None:
-        size = self._get_optimal_chunk_size(int.from_bytes(self.file_total_size, 'big'))
+        size = self.data_size
+    
         self.file = open('./get', 'wb')
         total = 0
-        print(f"total size{self.data_size}")
+        print(f"data size{self.data_size}")
         while (total < self.data_size):
             buffer = self.read_exactly(size, sock)
             print(len(buffer))
             print("-buffer len data")
             total += len(buffer)
             self.file.write(buffer)
-            self.file.flush() 
+            self.file.flush()
         
-            
-            
+        print("end")
+        self.readed_size = total
+    
+
+    def run_server_reader(self, sock : socket):
+        self.read_header(sock)
+        self.read_data(sock)
+        print("got it")
+        if self._is_correct():
+            sock.send('FILE ACCEPTED'.encode(self.code))
+            print("wow")
+        else:
+            sock.sendall('SOMETHING WRONG WITH FILE SIZE'.encode(self.code))
+            print("wow2")
+
+
+        sock.close()
+        
 
 
 
