@@ -1,2 +1,4 @@
 file:
   file_max_size: а
+  file_total_size_len: 13
+  file_header_size_len: 5

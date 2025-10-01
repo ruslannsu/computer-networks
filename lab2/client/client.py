@@ -10,7 +10,7 @@ class Client:
         self.config = self._load_config()
         self.server_address = (self.config['server']['server_ip'], self.config['server']['server_port'])
         self.file_path = self.config['file']['file_path']
-        self.protocol = FileProtocol('f', 5, 13)
+        self.protocol = FileProtocol('FILE', 5, 13)
 
 
     def _load_config(self):

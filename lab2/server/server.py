@@ -1,6 +1,7 @@
 from socket import *
 from server_features.server_threads import ServerThread
 import yaml
+from server_features.server_reader import ServerReader
 
 
 
@@ -10,6 +11,7 @@ class Server:
         self.server_socket = socket(AF_INET, SOCK_STREAM)
         self.server_socket.bind(self.address)
         self.server_threads = []
+        self.server_reader = ServerReader(5, 'MAGIC', 13, 5, 1000000000, 4096)
 
 
     def _load_config(self):
@@ -21,7 +23,7 @@ class Server:
         self.server_socket.listen()
         while True: 
             client_socket, _  = self.server_socket.accept()
-            server_thread = ServerThread(client_socket)
+            server_thread = ServerThread(client_socket, self.server_reader)
             self.server_threads.append(server_thread)
             server_thread.start()
 

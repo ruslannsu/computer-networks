@@ -11,5 +11,7 @@ class ClientWriter(Thread):
 
     def run(self) -> None:
         self.protocol.send_header(self.client_socket)
+        self.protocol.send_data(self.client_socket)
+        
         
             
