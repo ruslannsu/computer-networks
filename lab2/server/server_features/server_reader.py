@@ -1,5 +1,9 @@
 import socket
 import time
+import logging
+
+
+
 class ServerReader():
     def __init__(self, magic_len: int, magic_word : str,file_total_size_len: int, file_header_size_len: int, total_size_max : int, header_max_size : int, speeds : dict) -> None:
         self.file_tota_size_len = file_total_size_len
@@ -11,7 +15,21 @@ class ServerReader():
         self.total_max_size = total_size_max
         self.hedaer_max_size = header_max_size
         self.speeds = speeds
+        self.logger = self._get_logger()
+
         
+        
+
+
+    def _get_logger(self):
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.INFO)
+        handler = logging.FileHandler(f"{__name__}.log", mode='w')
+        formatter = logging.Formatter("%(name)s %(asctime)s %(levelname)s %(message)s")
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        return logger
+
 
     def read_exactly(self, size : int, sock : socket):
         data = b''
@@ -54,12 +72,15 @@ class ServerReader():
         self.file_header = self.read_exactly(self.header_size, sock)
         print(self.file_header.decode(self.code))
         self.data_size = (int.from_bytes(self.file_total_size, 'big')) - len(magic_word) - self.header_size - self.file_header_size_len - self.file_tota_size_len
+        
+        self.logger.info(f"GET FILE HEADER: {self.file_header.decode(self.code)}")
+
 
 
     def read_data(self, sock : socket, start_time_session : int) -> None:
         size = self.data_size
 
-        self.file = open('./get', 'wb')
+        self.file = open(f'./{self.file_header.decode(self.code)}', 'wb')
         total = 0
         print(f"data size{self.data_size}")
         while (total < self.data_size):
@@ -83,6 +104,9 @@ class ServerReader():
                     self.speeds[address] = (speed, mid_speed)
             
         self.readed_size = total
+
+        self.logger.info(f"GET FILE DATA WITH SIZE {total}")
+
     
 
     def run_server_reader(self, sock : socket):

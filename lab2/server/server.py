@@ -3,6 +3,11 @@ from server_features.server_threads import ServerThread
 import yaml
 from server_features.server_reader import ServerReader
 from server_features.monitor import Monitor
+import logging
+
+
+
+
 
 class Server:
     def __init__(self):
@@ -15,6 +20,17 @@ class Server:
         self.speeds = {}
         self.server_reader = ServerReader(5, 'MAGIC', 13, 5, 10000000000000, 4096, self.speeds)
         self.monitor = Monitor(speeds=self.speeds)
+        self._init_logging()
+
+
+    def _init_logging(self):
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.INFO)
+        handler = logging.FileHandler(f"{__name__}.log", mode='w')
+        formatter = logging.Formatter("%(name)s %(asctime)s %(levelname)s %(message)s")
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+
 
     def __exit__(self):
         self.server_socket.close()
@@ -23,7 +39,6 @@ class Server:
     def _load_config(self):
         with open('config.yaml', 'r') as f:
             return yaml.safe_load(f) 
-        
         
     def _listen(self):
         self.monitor.start()
