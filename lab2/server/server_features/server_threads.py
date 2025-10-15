@@ -12,10 +12,6 @@ class ServerThread(Thread):
     def run(self) -> None:
         self.reader.run_server_reader(self.client_socket)
         
-        
-    def __exit__(self):
-        self.client_socket.close()
-
 
 
 

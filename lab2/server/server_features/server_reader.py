@@ -1,37 +1,46 @@
 import socket
 import time
 import logging
+from server_features.monitor import Monitor
 
 
 
 class ServerReader():
-    def __init__(self, magic_len: int, magic_word : str,file_total_size_len: int, file_header_size_len: int, total_size_max : int, header_max_size : int, speeds : dict) -> None:
+    def __init__(self, magic_len: int, magic_word : str,file_total_size_len: int,
+                  file_header_size_len: int, total_size_max : int, header_max_size : int,
+                    speeds : dict, monitor: Monitor) -> None:
+        
         self.file_tota_size_len = file_total_size_len
         self.file_header_size_len = file_header_size_len
+
         self.magic_len = magic_len
         self.magic_word = magic_word
+
         self.header = None
         self.code = 'utf-8'
+
         self.total_max_size = total_size_max
         self.hedaer_max_size = header_max_size
+
         self.speeds = speeds
+
+        self.monitor = monitor
+
         self.logger = self._get_logger()
-
-        
-        
-
 
     def _get_logger(self):
         logger = logging.getLogger(__name__)
         logger.setLevel(logging.INFO)
+
         handler = logging.FileHandler(f"{__name__}.log", mode='w')
         formatter = logging.Formatter("%(name)s %(asctime)s %(levelname)s %(message)s")
+
         handler.setFormatter(formatter)
         logger.addHandler(handler)
         return logger
 
 
-    def read_exactly(self, size : int, sock : socket):
+    def read_exactly(self, size: int, sock: socket):
         data = b''
         while len(data) < size:
             chunk = sock.recv(size - len(data))
@@ -64,6 +73,7 @@ class ServerReader():
         print(int.from_bytes(self.file_total_size, 'big'))
         if (int.from_bytes(self.file_total_size, 'big') >= self.total_max_size):
             raise ConnectionError('SIZE TOTAL ERROR')
+        
         self.header_size = int.from_bytes(self.read_exactly(self.file_header_size_len, sock), 'big')
         print(self.header_size)
         if (self.header_size >= self.hedaer_max_size):
@@ -73,15 +83,19 @@ class ServerReader():
         print(self.file_header.decode(self.code))
         self.data_size = (int.from_bytes(self.file_total_size, 'big')) - len(magic_word) - self.header_size - self.file_header_size_len - self.file_tota_size_len
         
-        self.logger.info(f"GET FILE HEADER: {self.file_header.decode(self.code)}")
+        self.logger.info(f"GOT FILE HEADER: {self.file_header.decode(self.code)}")
 
 
 
     def read_data(self, sock : socket, start_time_session : int) -> None:
+        start_time_session = time.time()
         size = self.data_size
-
+        
         self.file = open(f'./{self.file_header.decode(self.code)}', 'wb')
         total = 0
+
+        address, _ = sock.getpeername()
+        bytes_diff = 0
         print(f"data size{self.data_size}")
         while (total < self.data_size):
             start_time = time.time()
@@ -92,30 +106,23 @@ class ServerReader():
             self.file.write(buffer)
             self.file.flush()
             end_time = time.time()
-            if (int(end_time) - int(start_time_session)) > 0:
-                if (((int(end_time) - int(start_time)) == 0)):
-                    speed, mid_speed = (len(buffer), total / int(end_time - start_time_session))
-                    address, _  = sock.getpeername()
-                    self.speeds[address] = (speed, mid_speed)
+            if self.monitor.update_speed(start_time, end_time, bytes_diff, address):
+                pass
 
-                else:
-                    speed, mid_speed  = (len(buffer) / (int(end_time) - int(start_time)), total / int(end_time - start_time_session))
-                    address, _ = sock.getpeername()
-                    self.speeds[address] = (speed, mid_speed)
-            
+
+                
+
         self.readed_size = total
 
         self.logger.info(f"GET FILE DATA WITH SIZE {total}")
+        
 
-    
-
-    def run_server_reader(self, sock : socket):
+    def run_server_reader(self, sock: socket) -> None:
         start_time = time.time()
         self.read_header(sock)
         self.read_data(sock, start_time)
         if self._is_correct():
-            sock.send('FILE ACCEPTED'.encode(self.code))
-            
+            sock.send('FILE ACCEPTED'.encode(self.code)) 
         else:
             sock.sendall('SOMETHING WRONG WITH FILE SIZE'.encode(self.code))
         
