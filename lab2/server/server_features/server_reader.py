@@ -91,26 +91,31 @@ class ServerReader():
         start_time_session = time.time()
         size = self.data_size
         
+        file_name = self.file_header.decode(self.code)
+        if file_name.find('/') >= 0 or file_name.find('\\') >= 0:
+            sock.close()
+            return None
+        
         self.file = open(f'./{self.file_header.decode(self.code)}', 'wb')
         total = 0
 
         address, _ = sock.getpeername()
         bytes_diff = 0
         print(f"data size{self.data_size}")
+        start_time = time.time()
         while (total < self.data_size):
-            start_time = time.time()
             buffer = sock.recv(1024)
-            print(len(buffer))
-            print("-buffer len data")
+           # print(len(buffer))
+            #print("-buffer len data")
             total += len(buffer)
             self.file.write(buffer)
             self.file.flush()
             end_time = time.time()
-            if self.monitor.update_speed(start_time, end_time, bytes_diff, address):
-                pass
+            bytes_diff += len(buffer)
+            if self.monitor.update_speed(start_time, end_time, bytes_diff, address, start_time_session, total):
+                bytes_diff = 0
+                start_time = time.time()
 
-
-                
 
         self.readed_size = total
 
@@ -121,8 +126,9 @@ class ServerReader():
         start_time = time.time()
         self.read_header(sock)
         self.read_data(sock, start_time)
+
         if self._is_correct():
-            sock.send('FILE ACCEPTED'.encode(self.code)) 
+            sock.send('ACP'.encode(self.code)) 
         else:
             sock.sendall('SOMETHING WRONG WITH FILE SIZE'.encode(self.code))
         

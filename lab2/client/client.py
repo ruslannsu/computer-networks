@@ -31,7 +31,8 @@ class Client:
         
 
         
-
+    def __eixt__(self):
+        self.socket.close()
 
         
 

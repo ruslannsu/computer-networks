@@ -8,7 +8,9 @@ class FileProtocol():
         self.file = open(self.file_path, mode='rb')
         self.data_size = os.stat(self.file_path).st_size
         self.data_size_coded = os.stat(self.file_path).st_size.to_bytes(file_data_size_len, 'big')
+        print("FILE NAME:")
         self.file_name = file_path.encode(self.enc)
+        print(self.file_name)
         self.file_header_size = len(file_path).to_bytes(file_header_size_len, byteorder='big')
         self.magic_word = 'MAGIC'.encode(self.enc)
         self.file_total_size = len(file_path) + file_header_size_len + len(self.magic_word) + self.data_size + file_data_size_len

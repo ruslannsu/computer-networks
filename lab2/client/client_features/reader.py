@@ -11,10 +11,14 @@ class ClientReader(Thread):
 
     def _read(self):
         while True: 
-            buffer = self.socket.recv(1024)
+            buffer = self.socket.recv(128)
             if (len(buffer) != 0):
-                print(buffer.decode('utf-8'))
+                print(buffer.decode('utf-8')[0:3])
+                if (buffer.decode('utf-8')[0:3] != 'ACP'):
+                    print("BAD")
+                    socket.close()
             time.sleep(5)
+        
     
 
     def run(self):

@@ -44,5 +44,3 @@ class Server:
             server_thread = ServerThread(client_socket, self.server_reader)
             self.server_threads.append(server_thread)
             server_thread.start()
-            #TODO clear array
-            #close sockets 
